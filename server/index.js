@@ -8,6 +8,13 @@ import "dotenv/config";
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 
+import { getShop } from "./database/shops/handlers.js";
+import {
+  storeCallback,
+  loadCallback,
+  deleteCallback,
+} from "./database/sessions/handlers.js";
+
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
 
@@ -21,8 +28,11 @@ Shopify.Context.initialize({
   HOST_NAME: process.env.HOST.replace(/https:\/\//, ""),
   API_VERSION: ApiVersion.April22,
   IS_EMBEDDED_APP: true,
-  // This should be replaced with your preferred storage strategy
-  SESSION_STORAGE: new Shopify.Session.MemorySessionStorage(),
+  SESSION_STORAGE: new Shopify.Session.CustomSessionStorage(
+    storeCallback,
+    loadCallback,
+    deleteCallback
+  ),
 });
 
 // Storing the currently active shops in memory will force them to re-login when your server restarts. You should
@@ -94,17 +104,25 @@ export async function createServer(
     next();
   });
 
-  app.use("/*", (req, res, next) => {
+  app.use("/*", async (req, res, next) => {
     const shop = req.query.shop;
+
+    if (!shop) {
+      next();
+      return;
+    }
 
     // Detect whether we need to reinstall the app, any request from Shopify will
     // include a shop in the query parameters.
     // @ts-ignore
-    if (app.get("active-shopify-shops")[shop] === undefined && shop) {
+    const activeShop = await getShop(shop);
+
+    if (activeShop === null || !activeShop.isInstalled) {
       res.redirect(`/auth?shop=${shop}`);
-    } else {
-      next();
+      return;
     }
+
+    next();
   });
 
   /**
