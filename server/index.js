@@ -78,6 +78,12 @@ export async function createServer(
       `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
     );
 
+    const allProducts = await Product.all({
+      session,
+      limit: 250,
+      status: "active",
+    });
+
     const countData = await Product.count({ session });
     res.status(200).send(countData);
   });
