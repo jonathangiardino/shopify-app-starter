@@ -3,7 +3,9 @@ import { DB } from "../client.js";
 
 async function storeCallback(session) {
   try {
-    await DB.from("sessions").upsert([{ id: session.id, session }]);
+    await DB.from("sessions").upsert([
+      { id: session.id, session, shop: session.shop },
+    ]);
     return true;
   } catch (err) {
     throw new Error(err);

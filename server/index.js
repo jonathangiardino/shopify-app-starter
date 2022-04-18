@@ -5,9 +5,15 @@ import cookieParser from "cookie-parser";
 import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import "dotenv/config";
 
+// middleware
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 
+// webhooks
+import { uninstall } from "./webhooks/handlers.js";
+import webhookGdprRoutes from "./webhooks/gdpr.js";
+
+// database
 import { getShop } from "./database/shops/handlers.js";
 import {
   storeCallback,
@@ -35,13 +41,10 @@ Shopify.Context.initialize({
   ),
 });
 
-// Storing the currently active shops in memory will force them to re-login when your server restarts. You should
-// persist this object in your app.
-const ACTIVE_SHOPIFY_SHOPS = {};
 Shopify.Webhooks.Registry.addHandler("APP_UNINSTALLED", {
   path: "/webhooks",
-  webhookHandler: async (topic, shop, body) => {
-    delete ACTIVE_SHOPIFY_SHOPS[shop];
+  webhookHandler: async (_topic, shop, _body) => {
+    await uninstall(shop);
   },
 });
 
@@ -53,7 +56,6 @@ export async function createServer(
   const app = express();
 
   app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
-  app.set("active-shopify-shops", ACTIVE_SHOPIFY_SHOPS);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 
   app.use(cookieParser(Shopify.Context.API_SECRET_KEY));
@@ -91,6 +93,9 @@ export async function createServer(
 
   app.use(express.json());
 
+  // GDPR WEBHOOK ROUTES
+  webhookGdprRoutes(app);
+
   app.use((req, res, next) => {
     const shop = req.query.shop;
     if (Shopify.Context.IS_EMBEDDED_APP && shop) {
@@ -117,7 +122,7 @@ export async function createServer(
     // @ts-ignore
     const activeShop = await getShop(shop);
 
-    if (activeShop === null || !activeShop.isInstalled) {
+    if (activeShop === null || (activeShop && !activeShop.isInstalled)) {
       res.redirect(`/auth?shop=${shop}`);
       return;
     }

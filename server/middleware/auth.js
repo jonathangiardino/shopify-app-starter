@@ -1,5 +1,5 @@
 import { Shopify } from "@shopify/shopify-api";
-import { getShop, updateShop } from "../database/shops/handlers.js";
+import { getShop, updateShop, createShop } from "../database/shops/handlers.js";
 import { getTimestamp } from "../../utils/misc.js";
 import { GET_SHOP_DATA } from "../../graphql/queries/shop.js";
 
@@ -89,6 +89,7 @@ export default function applyAuthMiddleware(app) {
           shop: session.shop,
           isInstalled: true,
           installedAt: getTimestamp(),
+          uninstalledAt: null,
         });
       } else {
         if (!!existingShop.shopData) {
