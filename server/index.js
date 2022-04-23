@@ -1,25 +1,22 @@
-// @ts-check
-import { resolve } from "path";
-import express from "express";
+import { ApiVersion, Shopify } from "@shopify/shopify-api";
 import cookieParser from "cookie-parser";
-import { Shopify, ApiVersion } from "@shopify/shopify-api";
 import "dotenv/config";
-
+import express from "express";
+import { resolve } from "path";
+import {
+  deleteCallback,
+  loadCallback,
+  storeCallback,
+} from "./database/sessions/handlers.js";
+// database
+import { getShop } from "./database/shops/handlers.js";
 // middleware
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
-
+import billingRoutes from "./routes/billing/index.js";
 // webhooks
-import { uninstall } from "./webhooks/handlers.js";
 import webhookGdprRoutes from "./webhooks/gdpr.js";
-
-// database
-import { getShop } from "./database/shops/handlers.js";
-import {
-  storeCallback,
-  loadCallback,
-  deleteCallback,
-} from "./database/sessions/handlers.js";
+import { uninstall } from "./webhooks/uninstall.js";
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -78,11 +75,11 @@ export async function createServer(
       `@shopify/shopify-api/dist/rest-resources/${Shopify.Context.API_VERSION}/index.js`
     );
 
-    const allProducts = await Product.all({
-      session,
-      limit: 250,
-      status: "active",
-    });
+    // const allProducts = await Product.all({
+    //   session,
+    //   limit: 250,
+    //   status: "active",
+    // });
 
     const countData = await Product.count({ session });
     res.status(200).send(countData);
@@ -101,6 +98,9 @@ export async function createServer(
 
   // GDPR WEBHOOK ROUTES
   webhookGdprRoutes(app);
+
+  // BILLING ROUTES
+  billingRoutes(app);
 
   app.use((req, res, next) => {
     const shop = req.query.shop;

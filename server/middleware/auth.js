@@ -1,8 +1,7 @@
 import { Shopify } from "@shopify/shopify-api";
-import { getShop, updateShop, createShop } from "../database/shops/handlers.js";
-import { getTimestamp } from "../../utils/misc.js";
 import { GET_SHOP_DATA } from "../../graphql/queries/shop.js";
-
+import { getTimestamp } from "../../utils/misc.js";
+import { createShop, getShop, updateShop } from "../database/shops/handlers.js";
 import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
 
 export default function applyAuthMiddleware(app) {
