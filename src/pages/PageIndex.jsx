@@ -8,8 +8,10 @@ import {
   TextContainer,
 } from "@shopify/polaris";
 import trophyImgUrl from "../assets/home-trophy.png";
+import analytics from "../lib/segment/index.js";
 
 export default function PageIndex() {
+  analytics.page();
   return (
     <Page fullWidth>
       <Layout>

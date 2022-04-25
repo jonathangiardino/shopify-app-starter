@@ -11,9 +11,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import trophyImgUrl from "../assets/home-trophy.png";
 import { ProductsCard } from "../components/ProductsCard";
+import analytics from "../lib/segment/index.js";
 import Link from "../router/Link.jsx";
 
 export default function HomePage() {
+  analytics.page();
   const navigate = useNavigate();
   const pagesLinks = [
     {

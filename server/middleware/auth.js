@@ -3,6 +3,7 @@ import { GET_SHOP_DATA } from "../../graphql/queries/shop.js";
 import { getTimestamp } from "../../utils/misc.js";
 import { createShop, getShop, updateShop } from "../database/shops/handlers.js";
 import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
+import analytics from "../lib/segment/index.js";
 
 export default function applyAuthMiddleware(app) {
   app.get("/auth", async (req, res) => {
@@ -75,6 +76,12 @@ export default function applyAuthMiddleware(app) {
           installedAt: getTimestamp(),
           uninstalledAt: null,
         });
+
+        // Track install event
+        analytics.track({
+          event: "install",
+          userId: session.shop,
+        });
       } else if (!existingShop.isInstalled) {
         // This is a REINSTALL
         await updateShop({
@@ -83,30 +90,41 @@ export default function applyAuthMiddleware(app) {
           installedAt: getTimestamp(),
           uninstalledAt: null,
         });
+
+        // Track reinstall event
+        analytics.track({
+          event: "reinstall",
+          userId: session.shop,
+        });
       } else {
         if (!!existingShop.shopData) {
           fetchShopData = false;
         }
+      }
 
-        if (fetchShopData) {
-          const client = new Shopify.Clients.Graphql(
-            session.shop,
-            session.accessToken
-          );
+      if (fetchShopData) {
+        const client = new Shopify.Clients.Graphql(
+          session.shop,
+          session.accessToken
+        );
 
-          const res = await client.query({ data: GET_SHOP_DATA });
+        // Track reauth event
+        analytics.track({
+          event: "reauth",
+          userId: session.shop,
+        });
 
-          if (!res?.body?.data?.shop) {
-            console.warn(`Missing shop data on ${shop}`);
-          } else {
-            const shopData = res.body.data.shop;
+        const res = await client.query({ data: GET_SHOP_DATA });
 
-            await updateShop({
-              id: existingShop.id,
-              shop: session.shop,
-              shopData,
-            });
-          }
+        if (!res?.body?.data?.shop) {
+          console.warn(`Missing shop data on ${shop}`);
+        } else {
+          const shopData = res.body.data.shop;
+
+          await updateShop({
+            shop: session.shop,
+            shopData,
+          });
         }
       }
 

@@ -1,5 +1,6 @@
 import { Shopify } from "@shopify/shopify-api";
 import { updateShop } from "../../../database/shops/handlers.js";
+import analytics from "../../../lib/segment/index.js";
 
 const GET_ACTIVE_SUBSCRIPTION = `{ 
 	appInstallation {
@@ -54,12 +55,11 @@ export const confirm = async (req, _res) => {
     // Update shopDoc
     await updateShop({ shop, subscription: subscriptionData });
 
-    // Segment Analytics TODO: add analytics
-    // analytics.track({
-    //   userId: shop,
-    //   event: "Subscription activated",
-    //   properties: subscriptionData,
-    // });
+    analytics.track({
+      userId: shop,
+      event: "Subscription activated",
+      properties: subscriptionData,
+    });
 
     return { success: true, shop };
   } catch (err) {
