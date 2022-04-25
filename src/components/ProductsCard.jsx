@@ -1,16 +1,15 @@
-import { useEffect, useState } from "react";
+import { gql, useMutation } from "@apollo/client";
+import { Toast, useAppBridge } from "@shopify/app-bridge-react";
 import {
+  Button,
   Card,
+  DisplayText,
   Heading,
   TextContainer,
-  DisplayText,
   TextStyle,
-  Button,
 } from "@shopify/polaris";
-import { Toast, useAppBridge } from "@shopify/app-bridge-react";
-import { gql, useMutation } from "@apollo/client";
-
-import { userLoggedInFetch } from "../App";
+import { useEffect, useState } from "react";
+import { userLoggedInFetch } from "../lib/shopify/helpers";
 
 const PRODUCTS_QUERY = gql`
   mutation populateProduct($input: ProductInput!) {

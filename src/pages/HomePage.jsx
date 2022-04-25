@@ -1,19 +1,33 @@
 import {
+  ActionList,
   Card,
-  Page,
-  Layout,
-  TextContainer,
-  Image,
-  Stack,
-  Link,
   Heading,
+  Image,
+  Layout,
+  Page,
+  Stack,
+  TextContainer,
 } from "@shopify/polaris";
-
+import { useNavigate } from "react-router-dom";
 import trophyImgUrl from "../assets/home-trophy.png";
+import { ProductsCard } from "../components/ProductsCard";
+import Link from "../router/Link.jsx";
 
-import { ProductsCard } from "./ProductsCard";
+export default function HomePage() {
+  const navigate = useNavigate();
+  const pagesLinks = [
+    {
+      content: "Page index",
+      helpText: "Page Index route",
+      onAction: () => navigate("/pages"),
+    },
+    {
+      content: "Page index",
+      helpText: "Page General route",
+      onAction: () => navigate("/pages/general"),
+    },
+  ];
 
-export function HomePage() {
   return (
     <Page fullWidth>
       <Layout>
@@ -77,6 +91,11 @@ export function HomePage() {
         </Layout.Section>
         <Layout.Section secondary>
           <ProductsCard />
+        </Layout.Section>
+        <Layout.Section fullWidth>
+          <Card>
+            <ActionList actionRole="menuitem" items={pagesLinks} />
+          </Card>
         </Layout.Section>
       </Layout>
     </Page>
