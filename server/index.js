@@ -1,3 +1,5 @@
+import Bugsnag from "@bugsnag/js";
+import BugsnagPluginExpress from "@bugsnag/plugin-express";
 import { ApiVersion, Shopify } from "@shopify/shopify-api";
 import cookieParser from "cookie-parser";
 import "dotenv/config";
@@ -17,6 +19,18 @@ import billingRoutes from "./routes/billing/index.js";
 // webhooks
 import webhookGdprRoutes from "./webhooks/gdpr.js";
 import { uninstall } from "./webhooks/uninstall.js";
+
+// Bugsnag
+const bugsnagApiKey = process.env.BUGSNAG_API_KEY ? true : false;
+if (bugsnagApiKey) {
+  Bugsnag.start({
+    apiKey: process.env.BUGSNAG_API_KEY,
+    plugins: [BugsnagPluginExpress],
+  });
+} else {
+  console.warn(`Missing BUGSNAG_API_KEY environment variable`);
+}
+const BugsnagMiddleware = bugsnagApiKey && Bugsnag.getPlugin("express");
 
 const USE_ONLINE_TOKENS = true;
 const TOP_LEVEL_OAUTH_COOKIE = "shopify_top_level_oauth";
@@ -51,6 +65,19 @@ export async function createServer(
   isProd = process.env.NODE_ENV === "production"
 ) {
   const app = express();
+
+  /**
+   * @type {import('vite').ViteDevServer}
+   */
+  let vite;
+
+  // Bugsnag Middleware
+  // -- must be first to catch any error downstream
+  if (bugsnagApiKey) {
+    app.use(BugsnagMiddleware.requestHandler);
+  }
+
+  Bugsnag.notify(new Error("Test error"));
 
   app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
@@ -136,10 +163,6 @@ export async function createServer(
     next();
   });
 
-  /**
-   * @type {import('vite').ViteDevServer}
-   */
-  let vite;
   if (!isProd) {
     vite = await import("vite").then(({ createServer }) =>
       createServer({
@@ -175,6 +198,10 @@ export async function createServer(
         .set("Content-Type", "text/html")
         .send(fs.readFileSync(`${process.cwd()}/dist/client/index.html`));
     });
+  }
+
+  if (bugsnagApiKey) {
+    app.use(BugsnagMiddleware.errorHandler);
   }
 
   return { app, vite };
