@@ -13,7 +13,7 @@ const RoutePropagator = () => {
 
   useEffect(() => {
     app.subscribe(Redirect.Action.APP, (payload) => {
-      navigate(payload.path);
+      navigate(payload?.path || "/");
     });
   }, [app]);
 

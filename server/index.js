@@ -77,8 +77,6 @@ export async function createServer(
     app.use(BugsnagMiddleware.requestHandler);
   }
 
-  Bugsnag.notify(new Error("Test error"));
-
   app.set("top-level-oauth-cookie", TOP_LEVEL_OAUTH_COOKIE);
   app.set("use-online-tokens", USE_ONLINE_TOKENS);
 

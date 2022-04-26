@@ -5,7 +5,7 @@ const analytics = Analytics({
   app: "starter",
   plugins: [
     segmentPlugin({
-      writeKey: "705pHjNlhlkrSCgdFtwkhD9L3BIFyw52",
+      writeKey: import.meta.env.VITE_SEGMENT_WRITE_KEY,
     }),
   ],
 });
