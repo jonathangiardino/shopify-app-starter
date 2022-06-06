@@ -8,6 +8,7 @@ import translations from "@shopify/polaris/locales/en.json";
 import { Outlet } from "react-router";
 import { GraphQLProvider } from "./GraphQLProvider.jsx";
 import MenuProvider from "./MenuProvider.jsx";
+import { ShopContextProvider } from "../hooks/index.js";
 
 export default function AppProvider() {
   return (
@@ -21,8 +22,10 @@ export default function AppProvider() {
       >
         <MenuProvider>
           <GraphQLProvider>
-            <Outlet />
-            <RoutePropagator />
+            <ShopContextProvider>
+              <Outlet />
+              <RoutePropagator />
+            </ShopContextProvider>
           </GraphQLProvider>
         </MenuProvider>
       </AppBridgeProvider>
