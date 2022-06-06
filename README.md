@@ -8,6 +8,8 @@ It leverages the [Shopify API Library](https://github.com/Shopify/shopify-node-a
 
 This is the repository used when you create a new Node app with the [Shopify CLI](https://shopify.dev/apps/tools/cli), but with some personal (opinionated) choices. It uses [Supabase](https://supabase.com/) as a database and has setup ready for  [Bugsnag](https://www.bugsnag.com/) for error tracking and  [Segment](https://segment.com/) for data tracking.
 
+*Note: to implement Bugsnag error tracking and track app events with Segment, simply get the required API keys for Bugsnag and the Segment write key, copy them in the ENV file and you're good to go!*
+
 ## Requirements
 
 - If you don’t have one, [create a Shopify partner account](https://partners.shopify.com/signup).
