@@ -45,7 +45,7 @@ To start, use this repository as template and follow the steps below:
 | shop |  text (primary key) |
 | id |  int8 |
 | scopes |    text   |
-| isinstalled | bool |
+| isInstalled | bool |
 | subscription | json |
 | settings | json |
 | installedAt | timestampz |
