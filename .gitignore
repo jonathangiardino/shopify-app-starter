@@ -19,3 +19,7 @@ config/tunnel.pid
 
 # webpack build output
 dist/
+
+#packages
+package.json
+package-lock.json
