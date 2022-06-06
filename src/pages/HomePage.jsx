@@ -67,10 +67,7 @@ export default function HomePage() {
                     </Link>{" "}
                     UI library and components.
                   </p>
-                  <p>
-                    Ready to go? Start populating your app with some sample
-                    products to view and test in your store.{" "}
-                  </p>
+                
                   <p>
                     Learn more about building out your app in{" "}
                     <Link
