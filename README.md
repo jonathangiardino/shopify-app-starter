@@ -49,7 +49,7 @@ To start, use this repository as template and follow the steps below:
 | subscription | json |
 | settings | json |
 | installedAt | timestampz |
-| ininstalledAt | timestampz |
+| uninstalledAt | timestampz |
 | shopData | json |
 | hasPreviouslySubscribed | bool |
 
