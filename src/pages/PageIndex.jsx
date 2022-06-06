@@ -7,6 +7,7 @@ import {
   Stack,
   TextContainer,
 } from "@shopify/polaris";
+import { useNavigate } from "react-router";
 import trophyImgUrl from "../assets/home-trophy.png";
 // import analytics from "../lib/segment/index.js";
 
@@ -17,8 +18,19 @@ export default function PageIndex() {
   //   name: "Index",
   //   type: "page",
   // });
+
+  const navigate = useNavigate();
+
   return (
-    <Page fullWidth>
+    <Page
+      fullWidth
+      breadcrumbs={[
+        {
+          content: "Back",
+          onAction: () => navigate(-1),
+        },
+      ]}
+    >
       <Layout>
         <Layout.Section>
           <Card sectioned>

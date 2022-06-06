@@ -3,7 +3,7 @@ import { GET_SHOP_DATA } from "../../graphql/queries/shop.js";
 import { getTimestamp } from "../../utils/misc.js";
 import { createShop, getShop, updateShop } from "../database/shops/handlers.js";
 import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
-import analytics from "../lib/segment/index.js";
+// import analytics from "../lib/segment/index.js";
 
 export default function applyAuthMiddleware(app) {
   app.get("/auth", async (req, res) => {
@@ -15,8 +15,8 @@ export default function applyAuthMiddleware(app) {
       req,
       res,
       req.query.shop,
-      "/auth/callback",
-      app.get("use-online-tokens")
+      "/auth/token",
+      false
     );
 
     res.redirect(redirectUrl);
@@ -38,6 +38,19 @@ export default function applyAuthMiddleware(app) {
         shop: req.query.shop,
       })
     );
+  });
+
+  app.get("/auth/token", async (req, res) => {
+    await Shopify.Auth.validateAuthCallback(req, res, req.query);
+    const redirectUrl = await Shopify.Auth.beginAuth(
+      req,
+      res,
+      req.query.shop,
+      "/auth/callback",
+      app.get("use-online-tokens")
+    );
+
+    res.redirect(redirectUrl);
   });
 
   app.get("/auth/callback", async (req, res) => {
@@ -78,10 +91,10 @@ export default function applyAuthMiddleware(app) {
         });
 
         // Track install event
-        analytics.track({
-          event: "install",
-          userId: session.shop,
-        });
+        // analytics.track({
+        //   event: "install",
+        //   userId: session.shop,
+        // });
       } else if (!existingShop.isInstalled) {
         // This is a REINSTALL
         await updateShop({
@@ -92,10 +105,10 @@ export default function applyAuthMiddleware(app) {
         });
 
         // Track reinstall event
-        analytics.track({
-          event: "reinstall",
-          userId: session.shop,
-        });
+        // analytics.track({
+        //   event: "reinstall",
+        //   userId: session.shop,
+        // });
       } else {
         if (!!existingShop.shopData) {
           fetchShopData = false;
@@ -109,10 +122,10 @@ export default function applyAuthMiddleware(app) {
         );
 
         // Track reauth event
-        analytics.track({
-          event: "reauth",
-          userId: session.shop,
-        });
+        // analytics.track({
+        //   event: "reauth",
+        //   userId: session.shop,
+        // });
 
         const res = await client.query({ data: GET_SHOP_DATA });
 

@@ -1,7 +1,7 @@
 import { composeGid } from "@shopify/admin-graphql-api-utilities";
 import { Shopify } from "@shopify/shopify-api";
 import { updateShop } from "../../../database/shops/handlers.js";
-import analytics from "../../../lib/segment/index.js";
+// import analytics from "../../../lib/segment/index.js";
 
 export const APP_SUBSCRIPTION_CANCEL = `mutation appSubscriptionCancel(
     $id: ID!
@@ -70,18 +70,18 @@ export const downgrade = async (req, _res) => {
       throw `Could not update db`;
     }
 
-    analytics.track({
-      userId: shop,
-      event: "Subscription deactivated",
-      properties: {
-        chargeId: shopData.subscription.chargeId,
-        name: shopData.subscription.name,
-        price: shopData.subscription.price,
-        isTest: shopData.subscription.test,
-        status: shopData.subscription.status,
-        trialDuration: shopData.subscription.trialDays,
-      },
-    });
+    // analytics.track({
+    //   userId: shop,
+    //   event: "Subscription deactivated",
+    //   properties: {
+    //     chargeId: shopData.subscription.chargeId,
+    //     name: shopData.subscription.name,
+    //     price: shopData.subscription.price,
+    //     isTest: shopData.subscription.test,
+    //     status: shopData.subscription.status,
+    //     trialDuration: shopData.subscription.trialDays,
+    //   },
+    // });
 
     console.log(
       `${shopData.shop} downgraded to free plan. Cancelled charge id: ${chargeId}`

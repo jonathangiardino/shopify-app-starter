@@ -7,6 +7,7 @@ import "@shopify/polaris/build/esm/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
 import { Outlet } from "react-router";
 import { GraphQLProvider } from "./GraphQLProvider.jsx";
+import MenuProvider from "./MenuProvider.jsx";
 
 export default function AppProvider() {
   return (
@@ -18,10 +19,12 @@ export default function AppProvider() {
           forceRedirect: true,
         }}
       >
-        <GraphQLProvider>
-          <Outlet />
-          <RoutePropagator />
-        </GraphQLProvider>
+        <MenuProvider>
+          <GraphQLProvider>
+            <Outlet />
+            <RoutePropagator />
+          </GraphQLProvider>
+        </MenuProvider>
       </AppBridgeProvider>
     </PolarisProvider>
   );

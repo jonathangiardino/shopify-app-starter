@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import HomePage from "../pages/HomePage.jsx";
 import PageGeneral from "../pages/PageGeneral.jsx";
 import PageIndex from "../pages/PageIndex.jsx";
+import Settings from "../pages/Settings.jsx";
 import AppProvider from "../providers/AppProvider.jsx";
 
 const AppRoutes = () => {
@@ -11,6 +12,7 @@ const AppRoutes = () => {
         <Route path="/" element={<AppProvider />}>
           <Route index element={<HomePage />} />
           <Route path="pages/*" element={<Pages />} />
+          <Route path="settings/*" element={<Settings />} />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -18,15 +20,6 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
-// const Promos = () => (
-//   <Routes>
-//     {/* TODO: <Route path="/" element={<LinksIndex />} /> */}
-//     <Route path="new" element={<NewLink />} />
-//     <Route path="dynamic" element={<DynamicLink />} />
-//     <Route path=":id" element={<EditLink />} />
-//   </Routes>
-// );
 
 const Pages = () => (
   <Routes>
