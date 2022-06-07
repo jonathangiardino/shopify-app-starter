@@ -63,7 +63,7 @@ To start, use this repository as template and follow the steps below:
 SHOPIFY_API_KEY=
 SHOPIFY_API_SECRET=
 SHOP=
-SCOPES=write products,write customers // update this manually when you know which scopes you need for your app
+SCOPES=write_products,write_customers,write_draft_orders // update this manually when you know which scopes you need for your app
 HOST=
 SUPABASE_URL=your Supabase url
 SUPABASE_ANON_KEY=Your Supabase anon key
