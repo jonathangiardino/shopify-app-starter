@@ -58,12 +58,12 @@ To start, use this repository as template and follow the steps below:
 ### Connect your local app with your newly created Shopify app in your partners account
 
 1. Open the terminal in your local project folder and run `shopify login` to make sure you are logged in with your cli in the same partner organization where you created the app.
-2. Once you made sure you're logged in, create an `.env`  file, leave all the values blank except for the `SUPABASE_URL` and `SUPABASE_ANON_KEY` as follow:
+2. Once you made sure you're logged in, create an `.env`  file, leave all the values as they are here except for the `SUPABASE_URL` and `SUPABASE_ANON_KEY` as follow:
 ```yaml
 SHOPIFY_API_KEY=
 SHOPIFY_API_SECRET=
 SHOP=
-SCOPES=
+SCOPES=write products,write customers // update this manually when you know which scopes you need for your app
 HOST=
 SUPABASE_URL=your Supabase url
 SUPABASE_ANON_KEY=Your Supabase anon key
@@ -75,6 +75,7 @@ VITE_SEGMENT_WRITE_KEY=
 ```sh
 shopify node serve
 ```
+if you get the error "✗ Couldn't verify your store ", just run `shopify node connect` to connect to your app and dev store.
 
 4. The command will prompt you to choose a partner account and a development store to install the app on, and it will also ask you if you want to update your app url, choose Yes.
 
