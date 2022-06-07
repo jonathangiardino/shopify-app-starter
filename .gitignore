@@ -22,5 +22,4 @@ config/tunnel.pid
 dist/
 
 #packages
-package.json
 package-lock.json
