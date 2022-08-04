@@ -5,6 +5,7 @@ import {
 import { AppProvider as PolarisProvider } from "@shopify/polaris";
 import "@shopify/polaris/build/esm/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
+import { HelmetProvider } from "react-helmet-async";
 import { Outlet } from "react-router";
 import { GraphQLProvider } from "./GraphQLProvider.jsx";
 import MenuProvider from "./MenuProvider.jsx";
@@ -20,14 +21,15 @@ export default function AppProvider() {
           forceRedirect: true,
         }}
       >
-        <MenuProvider>
-          <GraphQLProvider>
-            <ShopContextProvider>
+        <GraphQLProvider>
+          <ShopContextProvider>
+            <HelmetProvider>
+              <MenuProvider />
               <Outlet />
               <RoutePropagator />
-            </ShopContextProvider>
-          </GraphQLProvider>
-        </MenuProvider>
+            </HelmetProvider>
+          </ShopContextProvider>
+        </GraphQLProvider>
       </AppBridgeProvider>
     </PolarisProvider>
   );
