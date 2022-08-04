@@ -8,7 +8,9 @@ import topLevelAuthRedirect from "../helpers/top-level-auth-redirect.js";
 export default function applyAuthMiddleware(app) {
   app.get("/auth", async (req, res) => {
     if (!req.signedCookies[app.get("top-level-oauth-cookie")]) {
-      return res.redirect(`/auth/toplevel?shop=${req.query.shop}`);
+      return res.redirect(
+        `/auth/toplevel?${new URLSearchParams(req.query).toString()}`
+      );
     }
 
     const redirectUrl = await Shopify.Auth.beginAuth(
@@ -64,12 +66,13 @@ export default function applyAuthMiddleware(app) {
       );
 
       const host = req.query.host;
-      const response = await Shopify.Webhooks.Registry.register({
+      const response = await Shopify.Webhooks.Registry.registerAll({
         shop: session.shop,
         accessToken: session.accessToken,
-        topic: "APP_UNINSTALLED",
-        path: "/webhooks",
       });
+
+      console.log(`Registered webhooks:`);
+      console.log(response);
 
       if (!response["APP_UNINSTALLED"].success) {
         console.log(
@@ -78,6 +81,7 @@ export default function applyAuthMiddleware(app) {
       }
 
       const existingShop = await getShop(session.shop);
+      const betaUsers = [""];
 
       if (!existingShop) {
         await createShop({
@@ -88,6 +92,8 @@ export default function applyAuthMiddleware(app) {
           settings: null,
           installedAt: getTimestamp(),
           uninstalledAt: null,
+          notifications: [],
+          settings: { beta: betaUsers.includes(session.shop) ? true : false },
         });
 
         // Track install event
@@ -102,6 +108,8 @@ export default function applyAuthMiddleware(app) {
           isInstalled: true,
           installedAt: getTimestamp(),
           uninstalledAt: null,
+          showOnboarding: true,
+          settings: { beta: betaUsers.includes(session.shop) ? true : false },
         });
 
         // Track reinstall event

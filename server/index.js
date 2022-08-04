@@ -16,8 +16,15 @@ import { getShop } from "./database/shops/handlers.js";
 import applyAuthMiddleware from "./middleware/auth.js";
 import verifyRequest from "./middleware/verify-request.js";
 import billingRoutes from "./routes/billing/index.js";
+import shopRoute from "./routes/shop/index.js";
 // webhooks
-import webhookGdprRoutes from "./webhooks/gdpr.js";
+import gdprRoutes from "./webhooks/gdprRoutes.js";
+import {
+  customerDataRequest,
+  customerRedact,
+  shopRedact,
+} from "./webhooks/gdprHandlers.js";
+import { hmacVerify } from "./webhooks/hmacVerify.js";
 import { uninstall } from "./webhooks/uninstall.js";
 
 // Bugsnag
@@ -52,10 +59,27 @@ Shopify.Context.initialize({
   ),
 });
 
-Shopify.Webhooks.Registry.addHandler("APP_UNINSTALLED", {
-  path: "/webhooks",
-  webhookHandler: async (_topic, shop, _body) => {
-    await uninstall(shop);
+Shopify.Webhooks.Registry.addHandlers({
+  APP_UNINSTALLED: {
+    path: "/webhooks",
+    webhookHandler: async (_topic, shop, _body) => {
+      await uninstall(shop);
+    },
+  },
+  CUSTOMERS_DATA_REQUEST: {
+    path: "/gdpr/customers_data_request",
+    webhookHandler: async (topic, shop, body) =>
+      await customerDataRequest(topic, shop, body),
+  },
+  CUSTOMERS_REDACT: {
+    path: "/gdpr/customers_redact",
+    webhookHandler: async (topic, shop, body) =>
+      await customerRedact(topic, shop, body),
+  },
+  SHOP_REDACT: {
+    path: "/gdpr/shop_redact",
+    webhookHandler: async (topic, shop, body) =>
+      await shopRedact(topic, shop, body),
   },
 });
 
@@ -104,11 +128,9 @@ export async function createServer(
   });
 
   app.use(express.json());
+  app.use("/gdpr", hmacVerify, gdprRoutes);
 
-  // GDPR WEBHOOK ROUTES
-  webhookGdprRoutes(app);
-
-  // BILLING ROUTES
+  shopRoute(app);
   billingRoutes(app);
 
   app.use((req, res, next) => {
@@ -116,7 +138,7 @@ export async function createServer(
     if (Shopify.Context.IS_EMBEDDED_APP && shop) {
       res.setHeader(
         "Content-Security-Policy",
-        `frame-ancestors https://${shop} https://admin.shopify.com;`
+        `frame-ancestors https://admin.shopify.com https://${shop}`
       );
     } else {
       res.setHeader("Content-Security-Policy", `frame-ancestors 'none';`);
@@ -127,22 +149,16 @@ export async function createServer(
   app.use("/*", async (req, res, next) => {
     const shop = req.query.shop;
 
-    if (!shop) {
-      next();
-      return;
-    }
-
     // Detect whether we need to reinstall the app, any request from Shopify will
     // include a shop in the query parameters.
     // @ts-ignore
     const activeShop = await getShop(shop);
-
-    if (activeShop === null || (activeShop && !activeShop.isInstalled)) {
-      res.redirect(`/auth?shop=${shop}`);
+    if ((activeShop === undefined || !activeShop.isInstalled) && shop) {
+      res.redirect(`/auth?${new URLSearchParams(req.query).toString()}`);
       return;
+    } else {
+      next();
     }
-
-    next();
   });
 
   if (!isProd) {
